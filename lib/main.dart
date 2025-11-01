@@ -1,30 +1,38 @@
-import 'package:docdoc/presintation/screens/home_screens/home_screen.dart';
-import 'package:docdoc/presintation/screens/home_screens/search_screen.dart';
-import 'package:docdoc/presintation/screens/profile_screens/profile_screen.dart';
-import 'package:docdoc/presintation/screens/registration_screens/splash_screen.dart';
+import 'package:docdoc/presentation/screens/main_screen.dart';
+import 'package:docdoc/presentation/screens/registration_screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
+import 'core/helpers/dio_helper.dart';
+import 'core/helpers/shared_prefs_helper.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DioHelper.init(baseUrl: 'https://vcare.integration25.com/api');
+  final rememberMe = await SharedPrefsHelper().getRememberMe();
+  final token = await SharedPrefsHelper().getRegistrationToken();
+
+  runApp(
+    MyApp(
+        initialRoute: (token != null && token.isNotEmpty && rememberMe)
+            ? '/main'
+            : '/signIn'),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String initialRoute;
+
+  const MyApp({super.key, required this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-
-      initialRoute: '/home',
-      routes: {
-        '/home': (_) => HomeScreen(),
-        '/profile': (_) => ProfileScreen(),
-        '/search': (_) => SearchScreen(),
-      },
-
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      home: SplashScreen(),
+      title: 'DocDoc',
+      initialRoute: initialRoute,
+      routes: {
+        '/signIn': (_) => const SignInScreen(),
+        '/main': (_) => const MainScreen(),
+      },
     );
   }
 }
